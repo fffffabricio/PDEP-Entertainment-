@@ -9,13 +9,127 @@ object pepita {
 }
 
 class Entrada {
-const banda
-const fecha
+  const property banda
+  const property fecha
+
+  method precio() = 1000 + productora.impuesto()
+
+  method precioPara(asistente) =
+    self.precio() * (1 - asistente.tipoAbono().descuento() / 100)
+}
+
+class Asistente {
+  var property tipoAbono
+  var historialEntradas = []
+  var property dinero
+
+  method comprarEntrada(banda, fecha) {
+    if (dinero <= 0) {
+      throw new Error("No tiene dinero")
+    }
+    historialEntradas.add(new Entrada(banda = banda, fecha = fecha))
+  }
+
+  method entradasDelAnioAnterior(anioActual) =
+    historialEntradas.filter({ entrada => entrada.fecha().year() == anioActual - 1 })
+
+  method nombreBandas() =
+    historialEntradas.map({ entrada => entrada.banda().nombre() }).asSet()
+}
+
+class Abono {
+  method descuento() = 0
+}
+
+class Fan inherits Abono {
+}
+
+class Vip inherits Abono {
+  var porcentajeDescuento = 0
+
+  override method descuento() = porcentajeDescuento
+
+  method bonificar() {
+    porcentajeDescuento += 1
+  }
+}
+
+class Banda {
+  const property nombre
+
+  method canon() = 1000000
+
+  method gastoExtra() = 0
+
+  method presupuesto() = self.gastoExtra() + self.canon()
+
+  method popularidad() = 0
+}
+
+class BandaDeRock inherits Banda {
+  var property solosGuitarra = 0
+
+  override method gastoExtra() = 10000
+
+  override method popularidad() = 100 * solosGuitarra
+}
+
+class BandaDeTrap inherits Banda {
+  const property tieneHielo
+
+  override method popularidad() = if (tieneHielo) 1000 else 0
+
+  override method canon() = self.popularidad() * 1000000
+}
+
+class BandaDeIndies inherits Banda {
+  const property instrumento = []
+
+  override method gastoExtra() = 500 * instrumento.size()
+
+  override method popularidad() = 3.14 * nombre().size()
+}
+
+object productora {
+  const property impuesto = 0.1
+  const entradasVendidas = []
+  const bandas = []
+
+  method agregarBanda(banda) {
+    bandas.add(banda)
+  }
+
+  method cantEntradasVendidas() =
+    entradasVendidas.size()
+
+  method recaudacion() =
+    entradasVendidas.sum({ entrada => entrada.precio() })
+
+  method presupuestoBanda() =
+    bandas.sum({ banda => banda.presupuesto() })
+
+  method gananciaTotal() =
+    self.recaudacion() - self.presupuestoBanda()
+
+  method bandaMasVendida() =
+    bandas.max({ banda => entradasVendidas.count({ entrada => entrada.banda() == banda }) })
+
+  method bonificarVip(asistente) {
+    asistente.bonificar()
+  }
+}
 
 
-method precio() = 1000 + productora.impuesto()
+class Entrada {
+    const property banda
+    const property fecha
 
+    method precio() = 1000 + productora.impuesto()
 
+    method precioPara(asistente) =
+        self.precio() *
+        (1 - asistente.tipoAbono().descuento() / 100)
+}
 }   
 
 class Asistente{
@@ -188,5 +302,3 @@ method bonificarVip(asistente) {
 
 
 }
-
-
